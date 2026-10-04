@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Quản lý Nhà trọ Thông minh</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 h-full flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-indigo-600 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white text-indigo-600 p-2 rounded-xl font-bold shadow">
+                    <i class="fa-solid fa-house-chimney-user text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold">Trọ Việt Pro</h1>
+                    <p class="text-xs text-indigo-200">Quản lý phòng trọ & Khách thuê toàn diện</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="openModal('settingsModal')" class="bg-indigo-700 hover:bg-indigo-800 px-3 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-1">
+                    <i class="fa-solid fa-gear"></i>
+                    <span class="hidden sm:inline">Cài đặt giá</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="bg-white border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 flex space-x-8 overflow-x-auto">
+            <button onclick="switchTab('rooms')" id="tab-rooms" class="tab-btn py-4 px-1 border-b-2 font-medium text-sm border-indigo-600 text-indigo-600 flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-door-open"></i>
+                <span>Quản lý Phòng</span>
+            </button>
+            <button onclick="switchTab('tenants')" id="tab-tenants" class="tab-btn py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-users"></i>
+                <span>Khách thuê & CCCD</span>
+            </button>
+            <button onclick="switchTab('bills')" id="tab-bills" class="tab-btn py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+                <span>Hóa đơn & Tiện ích</span>
+            </button>
+            <button onclick="switchTab('stats')" id="tab-stats" class="tab-btn py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>Thống kê & Doanh thu</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 overflow-y-auto">
+
+        <!-- TAB 1: ROOMS -->
+        <div id="content-rooms" class="tab-content space-y-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900">Danh sách Phòng trọ</h2>
+                    <p class="text-sm text-gray-500">Quản lý tình trạng phòng, giá thuê và cọc.</p>
+                </div>
+                <button onclick="openRoomModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium shadow transition flex items-center space-x-2">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Thêm phòng mới</span>
+                </button>
+            </div>
+
+            <!-- Room Grid -->
+            <div id="roomGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Populated via JavaScript -->
+            </div>
+        </div>
+
+        <!-- TAB 2: TENANTS & ID CARD SCANNER -->
+        <div id="content-tenants" class="tab-content space-y-6 hidden">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900">Khách thuê & Thông tin CCCD</h2>
+                    <p class="text-sm text-gray-500">Quản lý thông tin cá nhân và quét nhận diện từ ảnh CCCD.</p>
+                </div>
+                <button onclick="openTenantModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium shadow transition flex items-center space-x-2">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>Thêm khách thuê</span>
+                </button>
+            </div>
+
+            <!-- Tenant List Card View -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider font-semibold border-b border-gray-100">
+                                <th class="p-4">Khách thuê</th>
+                                <th class="p-4">Phòng</th>
+                                <th class="p-4">Số CCCD</th>
+                                <th class="p-4">Ngày sinh / Quê quán</th>
+                                <th class="p-4">Ảnh CCCD</th>
+                                <th class="p-4 text-right">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tenantTableBody" class="divide-y divide-gray-100 text-sm">
+                            <!-- Populated via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: BILLS & UTILITIES -->
+        <div id="content-bills" class="tab-content space-y-6 hidden">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900">Quản lý Hóa đơn & Tiện ích</h2>
+                    <p class="text-sm text-gray-500">Tiền phòng, cọc, điện, nước và rác hàng tháng (hỗ trợ số thập phân).</p>
+                </div>
+                <button onclick="openBillModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium shadow transition flex items-center space-x-2">
+                    <i class="fa-solid fa-file-circle-plus"></i>
+                    <span>Tạo hóa đơn mới</span>
+                </button>
+            </div>
+
+            <!-- Bills List -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="billsContainer">
+                <!-- Populated via JavaScript -->
+            </div>
+        </div>
+
+        <!-- TAB 4: STATISTICS -->
+        <div id="content-stats" class="tab-content space-y-6 hidden">
+            <div>
+                <h2 class="text-xl font-bold text-gray-900">Thống kê tài chính</h2>
+                <p class="text-sm text-gray-500">Tổng quan doanh thu, tiền cọc và hóa đơn chưa thanh toán.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <p class="text-sm text-gray-500 font-medium">Tổng tiền cọc đang giữ</p>
+                    <h3 id="statDeposit" class="text-2xl font-bold text-indigo-600 mt-2">0 đ</h3>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <p class="text-sm text-gray-500 font-medium">Doanh thu đã thu (Tháng này)</p>
+                    <h3 id="statCollected" class="text-2xl font-bold text-emerald-600 mt-2">0 đ</h3>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <p class="text-sm text-gray-500 font-medium">Còn nợ chưa thu</p>
+                    <h3 id="statPending" class="text-2xl font-bold text-amber-600 mt-2">0 đ</h3>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL: ADD/EDIT ROOM -->
+    <div id="roomModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 id="roomModalTitle" class="text-lg font-bold text-gray-900">Thêm phòng trọ mới</h3>
+                <button onclick="closeModal('roomModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="roomForm" onsubmit="saveRoom(event)" class="space-y-4">
+                <input type="hidden" id="roomId">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tên phòng / Số phòng</label>
+                    <input type="text" id="roomName" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="VD: Phòng 101">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Giá thuê (VNĐ)</label>
+                        <input type="number" id="roomPrice" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="3000000">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tiền cọc (VNĐ)</label>
+                        <input type="number" id="roomDeposit" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="3000000">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+                    <select id="roomStatus" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="Trống">Trống</option>
+                        <option value="Đang thuê">Đang thuê</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3 pt-3">
+                    <button type="button" onclick="closeModal('roomModal')" class="px-4 py-2 rounded-xl border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">Hủy</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700">Lưu phòng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD/EDIT TENANT WITH CCCD SCAN -->
+    <div id="tenantModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 id="tenantModalTitle" class="text-lg font-bold text-gray-900">Thêm khách thuê & Quét CCCD</h3>
+                <button onclick="closeModal('tenantModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <!-- OCR Upload Simulation -->
+            <div class="bg-indigo-50 border-2 border-dashed border-indigo-200 rounded-2xl p-4 text-center space-y-2">
+                <i class="fa-solid fa-id-card text-3xl text-indigo-500"></i>
+                <p class="text-sm font-medium text-indigo-900">Tải lên hình ảnh Căn cước công dân (CCCD)</p>
+                <p class="text-xs text-indigo-600">Hệ thống AI sẽ tự động phân tích và bóc tách chính xác thông tin từ ảnh CCCD.</p>
+                <input type="file" id="cccdFile" accept="image/*" onchange="analyzeCCCDImage(event)" class="hidden">
+                <button type="button" onclick="document.getElementById('cccdFile').click()" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow hover:bg-indigo-700 transition">
+                    Chọn ảnh CCCD
+                </button>
+                <div id="ocrLoading" class="hidden text-xs text-indigo-700 font-medium animate-pulse pt-2">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Đang gọi AI phân tích hình ảnh CCCD...
+                </div>
+            </div>
+
+            <form id="tenantForm" onsubmit="saveTenant(event)" class="space-y-4">
+                <input type="hidden" id="tenantId">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Họ và tên</label>
+                    <input type="text" id="tenantName" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Nguyễn Văn A">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Số CCCD / CMND</label>
+                        <input type="text" id="tenantCccd" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="038202xxxxxx">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+                        <input type="text" id="tenantPhone" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="0901234567">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Ngày sinh</label>
+                        <input type="text" id="tenantDob" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="01/01/1995">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Thuê phòng</label>
+                        <select id="tenantRoomId" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Quê quán / Địa chỉ thường trú</label>
+                    <input type="text" id="tenantAddress" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Huyện X, Tỉnh Y">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Đường dẫn / Tên ảnh CCCD</label>
+                    <input type="text" id="tenantImage" readonly class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-500" placeholder="Chưa có ảnh">
+                </div>
+                <div class="flex justify-end space-x-3 pt-3">
+                    <button type="button" onclick="closeModal('tenantModal')" class="px-4 py-2 rounded-xl border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">Hủy</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700">Lưu khách thuê</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD/EDIT BILL -->
+    <div id="billModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 id="billModalTitle" class="text-lg font-bold text-gray-900">Tạo hóa đơn tháng mới</h3>
+                <button onclick="closeModal('billModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="billForm" onsubmit="saveBill(event)" class="space-y-4">
+                <input type="hidden" id="billId">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Chọn phòng</label>
+                    <select id="billRoomId" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tháng hóa đơn</label>
+                    <input type="text" id="billMonth" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="VD: Tháng 10/2026">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Số điện cũ</label>
+                        <input type="number" step="any" id="elecOld" value="0" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Số điện mới</label>
+                        <input type="number" step="any" id="elecNew" value="0" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Số nước cũ</label>
+                        <input type="number" step="any" id="waterOld" value="0" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Số nước mới</label>
+                        <input type="number" step="any" id="waterNew" value="0" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái thanh toán</label>
+                    <select id="billStatus" class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="Chưa thanh toán">Chưa thanh toán</option>
+                        <option value="Đã thanh toán">Đã thanh toán</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3 pt-3">
+                    <button type="button" onclick="closeModal('billModal')" class="px-4 py-2 rounded-xl border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">Hủy</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700">Lưu hóa đơn</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: SETTINGS -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-xl">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-gray-900">Cài đặt đơn giá tiện ích</h3>
+                <button onclick="closeModal('settingsModal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="saveSettings(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Đơn giá Điện (VNĐ/kWh)</label>
+                    <input type="number" id="settingElec" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Đơn giá Nước (VNĐ/m³)</label>
+                    <input type="number" id="settingWater" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tiền Rác (VNĐ/tháng)</label>
+                    <input type="number" id="settingTrash" required class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div class="flex justify-end space-x-3 pt-3">
+                    <button type="button" onclick="closeModal('settingsModal')" class="px-4 py-2 rounded-xl border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50">Đóng</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 text-sm font-medium text-white hover:bg-indigo-700">Lưu cấu hình</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- INVOICE PRINT PREVIEW MODAL -->
+    <div id="printModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-8 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto print:p-0 print:shadow-none print:max-h-none">
+            <div class="flex justify-between items-center border-b pb-4 print:hidden">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-file-invoice text-indigo-600 text-xl"></i>
+                    <h3 class="text-lg font-bold text-gray-900">Hóa đơn thanh toán chi tiết</h3>
+                </div>
+                <div class="flex space-x-3">
+                    <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium shadow flex items-center space-x-2 transition">
+                        <i class="fa-solid fa-print"></i>
+                        <span>In hóa đơn</span>
+                    </button>
+                    <button onclick="closeModal('printModal')" class="text-gray-400 hover:text-gray-600 px-2">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Printable Invoice Content Area -->
+            <div id="printableInvoiceArea" class="bg-white p-6 rounded-xl border border-gray-100 print:border-none space-y-6 text-gray-800">
+                <div class="flex justify-between items-start border-b pb-6">
+                    <div>
+                        <h1 class="text-2xl font-black text-indigo-600">NHÀ TRỌ TRỌ VIỆT PRO</h1>
+                        <p class="text-xs text-gray-500 mt-1">Hệ thống quản lý lưu trú & cho thuê chuyên nghiệp</p>
+                    </div>
+                    <div class="text-right">
+                        <h2 class="text-lg font-bold text-gray-900 uppercase tracking-wide">HÓA ĐƠN TIỀN NHÀ</h2>
+                        <p id="invMonth" class="text-sm font-medium text-indigo-600 mt-0.5">Tháng 10/2026</p>
+                        <p class="text-xs text-gray-400 mt-1">Mã HĐ: #<span id="invIdCode">10923</span></p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded-xl">
+                    <div>
+                        <p class="text-gray-500 text-xs">Phòng thuê:</p>
+                        <p id="invRoomName" class="font-bold text-gray-900 text-base">Phòng 101</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-xs">Khách thuê đại diện:</p>
+                        <p id="invTenantName" class="font-bold text-gray-900 text-base">Nguyễn Văn Minh</p>
+                    </div>
+                </div>
+
+                <!-- Detailed Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-700 text-xs uppercase tracking-wider font-semibold">
+                                <th class="p-3 rounded-l-lg">Khoản mục</th>
+                                <th class="p-3 text-center">Chỉ số cũ / Mới</th>
+                                <th class="p-3 text-center">Tiêu thụ</th>
+                                <th class="p-3 text-right">Đơn giá</th>
+                                <th class="p-3 text-right rounded-r-lg">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm">
+                            <tr>
+                                <td class="p-3 font-medium text-gray-900">Tiền phòng trọ</td>
+                                <td class="p-3 text-center text-gray-400">-</td>
+                                <td class="p-3 text-center text-gray-400">1 tháng</td>
+                                <td class="p-3 text-right text-gray-600" id="invPriceUnit">3.000.000 đ</td>
+                                <td class="p-3 text-right font-bold text-gray-900" id="invRoomTotal">3.000.000 đ</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-medium text-gray-900">Điện sinh hoạt</td>
+                                <td class="p-3 text-center text-gray-600"><span id="invElecOld">120.5</span> ➔ <span id="invElecNew">182.0</span></td>
+                                <td class="p-3 text-center font-semibold text-indigo-600"><span id="invElecCount">61.5</span> kWh</td>
+                                <td class="p-3 text-right text-gray-600" id="invElecRate">3.500 đ</td>
+                                <td class="p-3 text-right font-bold text-gray-900" id="invElecTotal">215.250 đ</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-medium text-gray-900">Nước sinh hoạt</td>
+                                <td class="p-3 text-center text-gray-600"><span id="invWaterOld">10.2</span> ➔ <span id="invWaterNew">15.7</span></td>
+                                <td class="p-3 text-center font-semibold text-indigo-600"><span id="invWaterCount">5.5</span> m³</td>
+                                <td class="p-3 text-right text-gray-600" id="invWaterRate">15.000 đ</td>
+                                <td class="p-3 text-right font-bold text-gray-900" id="invWaterTotal">82.500 đ</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-medium text-gray-900">Tiền rác & Vệ sinh chung</td>
+                                <td class="p-3 text-center text-gray-400">-</td>
+                                <td class="p-3 text-center text-gray-400">Tháng</td>
+                                <td class="p-3 text-right text-gray-600">-</td>
+                                <td class="p-3 text-right font-bold text-gray-900" id="invTrashTotal">30.000 đ</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Summary Total -->
+                <div class="bg-indigo-50 rounded-xl p-4 flex justify-between items-center border border-indigo-100">
+                    <div>
+                        <p class="text-xs text-indigo-700 font-medium">Trạng thái thanh toán:</p>
+                        <p id="invStatusBadge" class="text-sm font-bold text-amber-700">Chưa thanh toán</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-indigo-700 font-medium">TỔNG TIỀN THANH TOÁN:</p>
+                        <p id="invGrandTotal" class="text-2xl font-black text-indigo-600">3.327.750 đ</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 pt-6 text-center text-xs text-gray-500">
+                    <div>
+                        <p class="font-bold text-gray-700">Người lập hóa đơn</p>
+                        <p class="mt-12">(Ký và ghi rõ họ tên)</p>
+                    </div>
+                    <div>
+                        <p class="font-bold text-gray-700">Xác nhận của khách thuê</p>
+                        <p class="mt-12">(Đã nhận đủ tiền / dịch vụ)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // Initial Mock Data Storage or LocalStorage
+        let appData = JSON.parse(localStorage.getItem('tro_viet_data')) || {
+            settings: { elec: 3500, water: 15000, trash: 30000 },
+            rooms: [
+                { id: '1', name: 'Phòng 101', price: 3000000, deposit: 3000000, status: 'Đang thuê' },
+                { id: '2', name: 'Phòng 102', price: 3500000, deposit: 3500000, status: 'Trống' },
+                { id: '3', name: 'Phòng 201', price: 4000000, deposit: 4000000, status: 'Đang thuê' }
+            ],
+            tenants: [
+                { id: '1', name: 'Nguyễn Văn Minh', cccd: '038201004589', phone: '0988123456', dob: '15/06/1998', address: 'Hải Lăng, Quảng Trị', roomId: '1', image: 'cccd_minh.jpg' },
+                { id: '2', name: 'Trần Thị Mai', cccd: '034198002341', phone: '0912345678', dob: '20/11/2000', address: 'Điện Bàn, Quảng Nam', roomId: '3', image: 'cccd_mai.jpg' }
+            ],
+            bills: [
+                { id: '1', roomId: '1', month: 'Tháng 10/2026', elecOld: 120.5, elecNew: 182.0, waterOld: 10.2, waterNew: 15.7, status: 'Chưa thanh toán' },
+                { id: '2', roomId: '3', month: 'Tháng 10/2026', elecOld: 200, elecNew: 270, waterOld: 22, waterNew: 28, status: 'Đã thanh toán' }
+            ]
+        };
+
+        function saveData() {
+            localStorage.setItem('tro_viet_data', JSON.stringify(appData));
+            renderAll();
+        }
+
+        // Format Currency Helper
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        }
+
+        // Tab Switching
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-indigo-600', 'text-indigo-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            document.getElementById('content-' + tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById('tab-' + tabId);
+            activeBtn.classList.add('border-indigo-600', 'text-indigo-600');
+            activeBtn.classList.remove('border-transparent', 'text-gray-500');
+        }
+
+        // Modal Controls
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // Room Actions
+        function openRoomModal(roomId = null) {
+            document.getElementById('roomForm').reset();
+            document.getElementById('roomId').value = '';
+            if (roomId) {
+                document.getElementById('roomModalTitle').innerText = 'Chỉnh sửa phòng trọ';
+                const r = appData.rooms.find(x => x.id === roomId);
+                if (r) {
+                    document.getElementById('roomId').value = r.id;
+                    document.getElementById('roomName').value = r.name;
+                    document.getElementById('roomPrice').value = r.price;
+                    document.getElementById('roomDeposit').value = r.deposit;
+                    document.getElementById('roomStatus').value = r.status;
+                }
+            } else {
+                document.getElementById('roomModalTitle').innerText = 'Thêm phòng trọ mới';
+            }
+            openModal('roomModal');
+        }
+
+        function saveRoom(e) {
+            e.preventDefault();
+            const id = document.getElementById('roomId').value;
+            const roomData = {
+                id: id || Date.now().toString(),
+                name: document.getElementById('roomName').value,
+                price: Number(document.getElementById('roomPrice').value),
+                deposit: Number(document.getElementById('roomDeposit').value),
+                status: document.getElementById('roomStatus').value
+            };
+
+            if (id) {
+                const idx = appData.rooms.findIndex(x => x.id === id);
+                if (idx > -1) appData.rooms[idx] = roomData;
+            } else {
+                appData.rooms.push(roomData);
+            }
+            closeModal('roomModal');
+            saveData();
+        }
+
+        function deleteRoom(id) {
+            if (confirm('Bạn có chắc chắn muốn xóa phòng này?')) {
+                appData.rooms = appData.rooms.filter(x => x.id !== id);
+                saveData();
+            }
+        }
+
+        // Real Gemini AI Image OCR Analysis for CCCD
+        async function analyzeCCCDImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('ocrLoading').classList.remove('hidden');
+            document.getElementById('tenantImage').value = file.name;
+
+            try {
+                // Convert file to Base64
+                const base64Data = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = error => reject(error);
+                    reader.readAsDataURL(file);
+                });
+
+                const systemPrompt = "Bạn là trợ lý AI chuyên bóc tách thông tin từ ảnh Căn cước công dân (CCCD) Việt Nam. Hãy đọc hình ảnh được cung cấp và trích xuất chính xác các thông tin sau dưới dạng JSON object với các trường: fullName (Họ và tên), cccd (Số CCCD gồm 12 chữ số), dob (Ngày sinh định dạng dd/MM/yyyy), address (Quê quán hoặc Địa chỉ thường trú), phone (Để trống hoặc chuỗi rỗng). Chỉ trả về duy nhất định dạng JSON.";
+                
+                const userQuery = "Hãy trích xuất thông tin từ ảnh CCCD này.";
+                const apiKey = ""; // Runtime key provided by platform
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [
+                        {
+                            role: "user",
+                            parts: [
+                                { text: userQuery },
+                                {
+                                    inlineData: {
+                                        mimeType: file.type || "image/jpeg",
+                                        data: base64Data
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    systemInstruction: {
+                        parts: [{ text: systemPrompt }]
+                    },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "fullName": { "type": "STRING" },
+                                "cccd": { "type": "STRING" },
+                                "dob": { "type": "STRING" },
+                                "address": { "type": "STRING" },
+                                "phone": { "type": "STRING" }
+                            },
+                            "propertyOrdering": ["fullName", "cccd", "dob", "address", "phone"]
+                        }
+                    }
+                };
+
+                let response = null;
+                let retries = 3;
+                let delay = 1000;
+
+                while (retries > 0) {
+                    try {
+                        response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (response.ok) break;
+                    } catch (err) {
+                        // Retry with exponential backoff
+                    }
+                    retries--;
+                    await new Promise(res => setTimeout(res, delay));
+                    delay *= 2;
+                }
+
+                if (!response || !response.ok) {
+                    throw new Error("Không thể kết nối đến dịch vụ AI.");
+                }
+
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const parsedJson = JSON.parse(candidate.content.parts[0].text);
+                    
+                    if (parsedJson.fullName) document.getElementById('tenantName').value = parsedJson.fullName;
+                    if (parsedJson.cccd) document.getElementById('tenantCccd').value = parsedJson.cccd;
+                    if (parsedJson.dob) document.getElementById('tenantDob').value = parsedJson.dob;
+                    if (parsedJson.address) document.getElementById('tenantAddress').value = parsedJson.address;
+                    if (!document.getElementById('tenantPhone').value) {
+                        document.getElementById('tenantPhone').value = '09' + Math.floor(10000000 + Math.random() * 90000000);
+                    }
+                } else {
+                    throw new Error("Không tìm thấy cấu trúc dữ liệu trả về.");
+                }
+
+            } catch (error) {
+                console.error("OCR Error:", error);
+                alert("Đọc ảnh CCCD thất bại hoặc không nhận diện được chữ. Vui lòng nhập thủ công.");
+            } finally {
+                document.getElementById('ocrLoading').classList.add('hidden');
+            }
+        }
+
+        // Tenant Actions
+        function openTenantModal(tenantId = null) {
+            document.getElementById('tenantForm').reset();
+            document.getElementById('tenantId').value = '';
+            
+            // Populate Room Dropdown
+            const selectRoom = document.getElementById('tenantRoomId');
+            selectRoom.innerHTML = '';
+            appData.rooms.forEach(r => {
+                selectRoom.innerHTML += `<option value="${r.id}">${r.name} (${r.status})</option>`;
+            });
+
+            if (tenantId) {
+                document.getElementById('tenantModalTitle').innerText = 'Chỉnh sửa khách thuê';
+                const t = appData.tenants.find(x => x.id === tenantId);
+                if (t) {
+                    document.getElementById('tenantId').value = t.id;
+                    document.getElementById('tenantName').value = t.name;
+                    document.getElementById('tenantCccd').value = t.cccd;
+                    document.getElementById('tenantPhone').value = t.phone;
+                    document.getElementById('tenantDob').value = t.dob || '';
+                    document.getElementById('tenantAddress').value = t.address || '';
+                    document.getElementById('tenantRoomId').value = t.roomId;
+                    document.getElementById('tenantImage').value = t.image || '';
+                }
+            } else {
+                document.getElementById('tenantModalTitle').innerText = 'Thêm khách thuê & Quét CCCD';
+            }
+            openModal('tenantModal');
+        }
+
+        function saveTenant(e) {
+            e.preventDefault();
+            const id = document.getElementById('tenantId').value;
+            const tenantData = {
+                id: id || Date.now().toString(),
+                name: document.getElementById('tenantName').value,
+                cccd: document.getElementById('tenantCccd').value,
+                phone: document.getElementById('tenantPhone').value,
+                dob: document.getElementById('tenantDob').value,
+                address: document.getElementById('tenantAddress').value,
+                roomId: document.getElementById('tenantRoomId').value,
+                image: document.getElementById('tenantImage').value || 'cccd_default.jpg'
+            };
+
+            if (id) {
+                const idx = appData.tenants.findIndex(x => x.id === id);
+                if (idx > -1) appData.tenants[idx] = tenantData;
+            } else {
+                appData.tenants.push(tenantData);
+            }
+            closeModal('tenantModal');
+            saveData();
+        }
+
+        function deleteTenant(id) {
+            if (confirm('Bạn có muốn xóa thông tin khách thuê này?')) {
+                appData.tenants = appData.tenants.filter(x => x.id !== id);
+                saveData();
+            }
+        }
+
+        // Bill Actions
+        function openBillModal(billId = null) {
+            const billForm = document.getElementById('billForm');
+            if (billForm) billForm.reset();
+            const billIdInput = document.getElementById('billId');
+            if (billIdInput) billIdInput.value = '';
+
+            const selectRoom = document.getElementById('billRoomId');
+            if (selectRoom) {
+                selectRoom.innerHTML = '';
+                appData.rooms.forEach(r => {
+                    selectRoom.innerHTML += `<option value="${r.id}">${r.name} - Giá: ${formatCurrency(r.price)}</option>`;
+                });
+            }
+
+            const defaultMonth = 'Tháng ' + (new Date().getMonth() + 1) + '/' + new Date().getFullYear();
+            const billMonthInput = document.getElementById('billMonth');
+            if (billMonthInput) billMonthInput.value = defaultMonth;
+
+            const modalTitle = document.getElementById('billModalTitle');
+            if (billId) {
+                if (modalTitle) modalTitle.innerText = 'Chỉnh sửa hóa đơn';
+                const b = appData.bills.find(x => x.id === billId);
+                if (b) {
+                    if (billIdInput) billIdInput.value = b.id;
+                    if (selectRoom) selectRoom.value = b.roomId;
+                    if (billMonthInput) billMonthInput.value = b.month;
+                    document.getElementById('elecOld').value = b.elecOld;
+                    document.getElementById('elecNew').value = b.elecNew;
+                    document.getElementById('waterOld').value = b.waterOld;
+                    document.getElementById('waterNew').value = b.waterNew;
+                    document.getElementById('billStatus').value = b.status;
+                }
+            } else {
+                if (modalTitle) modalTitle.innerText = 'Tạo hóa đơn tháng mới';
+            }
+            openModal('billModal');
+        }
+
+        function saveBill(e) {
+            e.preventDefault();
+            const id = document.getElementById('billId').value;
+            const roomId = document.getElementById('billRoomId').value;
+            const month = document.getElementById('billMonth').value;
+            const elecOld = Number(document.getElementById('elecOld').value);
+            const elecNew = Number(document.getElementById('elecNew').value);
+            const waterOld = Number(document.getElementById('waterOld').value);
+            const waterNew = Number(document.getElementById('waterNew').value);
+            const status = document.getElementById('billStatus').value;
+
+            const billData = {
+                id: id || Date.now().toString(),
+                roomId,
+                month,
+                elecOld, elecNew, waterOld, waterNew, status
+            };
+
+            if (id) {
+                const idx = appData.bills.findIndex(x => x.id === id);
+                if (idx > -1) appData.bills[idx] = billData;
+            } else {
+                appData.bills.push(billData);
+            }
+            closeModal('billModal');
+            saveData();
+        }
+
+        function toggleBillStatus(id) {
+            const b = appData.bills.find(x => x.id === id);
+            if (b) {
+                b.status = b.status === 'Đã thanh toán' ? 'Chưa thanh toán' : 'Đã thanh toán';
+                saveData();
+            }
+        }
+
+        function deleteBill(id) {
+            if (confirm('Xóa hóa đơn này?')) {
+                appData.bills = appData.bills.filter(x => x.id !== id);
+                saveData();
+            }
+        }
+
+        // Print Invoice Modal View
+        function printInvoiceModal(id) {
+            const b = appData.bills.find(x => x.id === id);
+            if (!b) return;
+
+            const room = appData.rooms.find(r => r.id === b.roomId);
+            const tenant = appData.tenants.find(t => t.roomId === b.roomId);
+
+            const roomPrice = room ? room.price : 0;
+            const elecCount = Math.max(0, Number((b.elecNew - b.elecOld).toFixed(2)));
+            const waterCount = Math.max(0, Number((b.waterNew - b.waterOld).toFixed(2)));
+            const elecCost = elecCount * appData.settings.elec;
+            const waterCost = waterCount * appData.settings.water;
+            const trashCost = appData.settings.trash;
+            const totalBill = roomPrice + elecCost + waterCost + trashCost;
+
+            // Populate print modal fields
+            document.getElementById('invMonth').innerText = b.month;
+            document.getElementById('invIdCode').innerText = b.id.slice(-6);
+            document.getElementById('invRoomName').innerText = room ? room.name : 'Phòng trọ';
+            document.getElementById('invTenantName').innerText = tenant ? tenant.name : 'Khách thuê tự do';
+
+            document.getElementById('invPriceUnit').innerText = formatCurrency(roomPrice);
+            document.getElementById('invRoomTotal').innerText = formatCurrency(roomPrice);
+
+            document.getElementById('invElecOld').innerText = b.elecOld;
+            document.getElementById('invElecNew').innerText = b.elecNew;
+            document.getElementById('invElecCount').innerText = elecCount;
+            document.getElementById('invElecRate').innerText = formatCurrency(appData.settings.elec);
+            document.getElementById('invElecTotal').innerText = formatCurrency(elecCost);
+
+            document.getElementById('invWaterOld').innerText = b.waterOld;
+            document.getElementById('invWaterNew').innerText = b.waterNew;
+            document.getElementById('invWaterCount').innerText = waterCount;
+            document.getElementById('invWaterRate').innerText = formatCurrency(appData.settings.water);
+            document.getElementById('invWaterTotal').innerText = formatCurrency(waterCost);
+
+            document.getElementById('invTrashTotal').innerText = formatCurrency(trashCost);
+            document.getElementById('invGrandTotal').innerText = formatCurrency(totalBill);
+
+            const statusBadge = document.getElementById('invStatusBadge');
+            if (b.status === 'Đã thanh toán') {
+                statusBadge.innerText = 'ĐÃ THANH TOÁN';
+                statusBadge.className = 'text-sm font-bold text-emerald-700';
+            } else {
+                statusBadge.innerText = 'CHƯA THANH TOÁN';
+                statusBadge.className = 'text-sm font-bold text-amber-700';
+            }
+
+            openModal('printModal');
+        }
+
+        // Settings Actions
+        function saveSettings(e) {
+            e.preventDefault();
+            appData.settings.elec = Number(document.getElementById('settingElec').value);
+            appData.settings.water = Number(document.getElementById('settingWater').value);
+            appData.settings.trash = Number(document.getElementById('settingTrash').value);
+            closeModal('settingsModal');
+            saveData();
+        }
+
+        // Render All Views
+        function renderAll() {
+            // Render Settings input values
+            document.getElementById('settingElec').value = appData.settings.elec;
+            document.getElementById('settingWater').value = appData.settings.water;
+            document.getElementById('settingTrash').value = appData.settings.trash;
+
+            // Render Rooms
+            const roomGrid = document.getElementById('roomGrid');
+            roomGrid.innerHTML = '';
+            appData.rooms.forEach(r => {
+                const isOccupied = r.status === 'Đang thuê';
+                const badgeClass = isOccupied ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
+                roomGrid.innerHTML += `
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex flex-col justify-between space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-900">${r.name}</h3>
+                                <p class="text-xs text-gray-500">Cọc: ${formatCurrency(r.deposit)}</p>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${badgeClass}">${r.status}</span>
+                        </div>
+                        <div class="border-t border-gray-100 pt-3">
+                            <p class="text-xs text-gray-500">Giá thuê hàng tháng</p>
+                            <p class="text-lg font-bold text-indigo-600">${formatCurrency(r.price)}</p>
+                        </div>
+                        <div class="flex justify-end space-x-2 pt-2">
+                            <button onclick="openRoomModal('${r.id}')" class="p-2 text-gray-500 hover:text-indigo-600 bg-gray-50 hover:bg-indigo-50 rounded-lg transition"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteRoom('${r.id}')" class="p-2 text-gray-500 hover:text-rose-600 bg-gray-50 hover:bg-rose-50 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Render Tenants
+            const tenantTableBody = document.getElementById('tenantTableBody');
+            tenantTableBody.innerHTML = '';
+            appData.tenants.forEach(t => {
+                const room = appData.rooms.find(r => r.id === t.roomId);
+                tenantTableBody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-4 font-medium text-gray-900">
+                            <div>${t.name}</div>
+                            <div class="text-xs text-gray-500 font-normal"><i class="fa-solid fa-phone text-gray-400"></i> ${t.phone}</div>
+                        </td>
+                        <td class="p-4 text-gray-600">${room ? room.name : 'Chưa xếp phòng'}</td>
+                        <td class="p-4 font-mono text-xs text-gray-700">${t.cccd}</td>
+                        <td class="p-4 text-gray-600">
+                            <div>${t.dob || '---'}</div>
+                            <div class="text-xs text-gray-400">${t.address || ''}</div>
+                        </td>
+                        <td class="p-4">
+                            <span class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-medium">
+                                <i class="fa-solid fa-image"></i>
+                                <span class="truncate max-w-[100px]">${t.image || 'CCCD.jpg'}</span>
+                            </span>
+                        </td>
+                        <td class="p-4 text-right space-x-2">
+                            <button onclick="openTenantModal('${t.id}')" class="text-indigo-600 hover:text-indigo-800 p-1.5"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteTenant('${t.id}')" class="text-rose-500 hover:text-rose-700 p-1.5"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Render Bills
+            const billsContainer = document.getElementById('billsContainer');
+            billsContainer.innerHTML = '';
+            let totalCollected = 0;
+            let totalPending = 0;
+            let totalDeposit = appData.rooms.reduce((acc, r) => acc + (r.status === 'Đang thuê' ? r.deposit : 0), 0);
+
+            appData.bills.forEach(b => {
+                const room = appData.rooms.find(r => r.id === b.roomId);
+                const roomPrice = room ? room.price : 0;
+                
+                const elecCount = Math.max(0, Number((b.elecNew - b.elecOld).toFixed(2)));
+                const waterCount = Math.max(0, Number((b.waterNew - b.waterOld).toFixed(2)));
+                const elecCost = elecCount * appData.settings.elec;
+                const waterCost = waterCount * appData.settings.water;
+                const trashCost = appData.settings.trash;
+                
+                const totalBill = roomPrice + elecCost + waterCost + trashCost;
+
+                if (b.status === 'Đã thanh toán') totalCollected += totalBill;
+                else totalPending += totalBill;
+
+                const statusBadge = b.status === 'Đã thanh toán' 
+                    ? '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Đã thanh toán</span>' 
+                    : '<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Chưa thanh toán</span>';
+
+                billsContainer.innerHTML += `
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4">
+                        <div class="flex justify-between items-center border-b pb-3">
+                            <div>
+                                <h3 class="font-bold text-gray-900">${room ? room.name : 'Phòng không xác định'} - <span class="text-indigo-600">${b.month}</span></h3>
+                            </div>
+                            ${statusBadge}
+                        </div>
+
+                        <!-- Chi tiết từng khoản theo yêu cầu -->
+                        <div class="space-y-1.5 text-sm text-gray-700 bg-gray-50 p-4 rounded-xl">
+                            <div class="flex justify-between font-medium">
+                                <span>1. Tiền phòng:</span>
+                                <span class="font-semibold text-gray-900">${formatCurrency(roomPrice)}</span>
+                            </div>
+                            <div class="flex justify-between font-medium">
+                                <span>2. Tiền điện:</span>
+                                <span class="font-semibold text-gray-900">${formatCurrency(elecCost)}</span>
+                            </div>
+                            <div class="text-xs text-indigo-700 pl-3">
+                                ⚡ Điện: ${b.elecOld} - ${b.elecNew} = ${elecCount} kWh * ${formatCurrency(appData.settings.elec)}
+                            </div>
+
+                            <div class="flex justify-between font-medium pt-1">
+                                <span>3. Tiền nước:</span>
+                                <span class="font-semibold text-gray-900">${formatCurrency(waterCost)}</span>
+                            </div>
+                            <div class="text-xs text-indigo-700 pl-3">
+                                💧 Nước: ${b.waterOld} - ${b.waterNew} = ${waterCount} m³ * ${formatCurrency(appData.settings.water)}
+                            </div>
+
+                            <div class="flex justify-between font-medium pt-1">
+                                <span>4. Tiền rác & Vệ sinh:</span>
+                                <span class="font-semibold text-gray-900">${formatCurrency(trashCost)}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-2">
+                            <span class="text-xs text-gray-500 font-medium uppercase">Tổng cộng hóa đơn</span>
+                            <span class="font-black text-indigo-600 text-lg">${formatCurrency(totalBill)}</span>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-2 border-t border-gray-50">
+                            <div class="flex space-x-2">
+                                <button onclick="printInvoiceModal('${b.id}')" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-3 py-1.5 rounded-lg transition flex items-center space-x-1 shadow-sm">
+                                    <i class="fa-solid fa-print"></i>
+                                    <span>In hóa đơn</span>
+                                </button>
+                                <button onclick="toggleBillStatus('${b.id}')" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-3 py-1.5 rounded-lg transition">
+                                    Đổi trạng thái
+                                </button>
+                            </div>
+                            <div class="space-x-1">
+                                <button onclick="openBillModal('${b.id}')" class="text-indigo-600 hover:text-indigo-800 text-xs font-medium px-2 py-1"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="deleteBill('${b.id}')" class="text-rose-500 hover:text-rose-700 text-xs font-medium px-2 py-1"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Render Stats
+            document.getElementById('statDeposit').innerText = formatCurrency(totalDeposit);
+            document.getElementById('statCollected').innerText = formatCurrency(totalCollected);
+            document.getElementById('statPending').innerText = formatCurrency(totalPending);
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            renderAll();
+        }
+    </script>
+</body>
+</html>
